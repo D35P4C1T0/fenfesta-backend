@@ -1,0 +1,4 @@
+djangorestframework
+environs
+bcrypt
+Django~=5.0.6
