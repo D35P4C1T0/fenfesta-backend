@@ -28,3 +28,6 @@ media/
 # Secret keys and sensitive information
 *.env
 *.env.*
+
+# Idea files
+.idea/
