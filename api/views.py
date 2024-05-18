@@ -1,38 +1,44 @@
 import bcrypt
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
+from django.contrib.auth import login, logout
+from rest_framework.views import APIView
+from rest_framework.authentication import SessionAuthentication
 
-from .models import Event, User, Reservation
+from .models import Event, Reservation, UserProfile as User
 from .serializers import EventSerializer, UserSerializer, ReservationSerializer
+
+from auth.validations import custom_validation, validate_password, validate_email
 
 
 # Class to view all users
 class UserListView(generics.ListCreateAPIView):
+    # only admin has access
+    permission_classes = (permissions.IsAdminUser,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 # Class to create a new user
 # also hash the password with bcrypt
-class UserCreateView(generics.ListCreateAPIView):
+class UserRetrieveDestroyView(generics.ListCreateAPIView):
+    # for admin only
+    permission_classes = (permissions.IsAdminUser,)
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    # post method to create a new user
-    def post(self, request, *args, **kwargs):
-        request.data._mutable = True
-        hashed_password = bcrypt.hashpw(request.data['hashed_password'].encode('utf-8'), bcrypt.gensalt())
-        request.data['hashed_password'] = hashed_password.decode('utf-8')
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-# delete user
-class UserDeleteView(generics.DestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    def get(self, request, *args, **kwargs):
+        try:
+            user = self.queryset.get(pk=kwargs["pk"])
+            return Response(UserSerializer(user).data)
+        except User.DoesNotExist:
+            return Response(
+                data={
+                    "message": "User with id: {} does not exist".format(kwargs["pk"])
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
 
     def delete(self, request, *args, **kwargs):
         try:

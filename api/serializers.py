@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from .models import User, Event, Subscription, Reservation
+from .models import Event, Subscription, Reservation
+from .models import UserProfile as User
+from django.contrib.auth import get_user_model, authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
