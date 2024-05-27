@@ -15,6 +15,8 @@ class Event(models.Model):
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     date = models.DateTimeField()
     location = models.CharField(max_length=100)
+    lat = models.DecimalField(max_digits=9, decimal_places=6)
+    lon = models.DecimalField(max_digits=9, decimal_places=6)
     capacity = models.IntegerField()
     capacity_left = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
