@@ -36,3 +36,4 @@ media/
 # Certificates
 *.crt
 *.pem
+*.key
