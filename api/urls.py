@@ -8,6 +8,8 @@ urlpatterns = [
     # Events
     path('events/', views.EventListRetrieveView.as_view(), name='events'),
     path('events/<int:pk>/', views.EventRetrieveViewDestroy.as_view(), name='event'),
+
+    path('events/month/<int:pk>/', views.EventListRetrieveViewGivenMonth.as_view(), name='events_month'),
     path('events/<int:pk>/reservations/', views.ReservationListRetrieveViewGivenEvent.as_view(),
          name='event_reservationsnmt'),
     path('events/<int:pk>/reservations/<str:username>/', views.ReservationCreateDeleteViewGivenUser.as_view(),

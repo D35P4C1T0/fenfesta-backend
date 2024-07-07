@@ -102,6 +102,27 @@ class EventListRetrieveView(generics.ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class EventListDeleteView(generics.ListCreateAPIView):
+    # admins only
+    permission_classes = (permissions.IsAdminUser,)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            events = self.queryset.all()
+            for event in events:
+                event.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Event.DoesNotExist:
+            return Response(
+                data={
+                    "message": "No events to delete"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
 # class to view a single event
 class EventRetrieveViewDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Event.objects.all()
@@ -142,6 +163,23 @@ class EventRetrieveViewDestroy(generics.RetrieveUpdateDestroyAPIView):
             return Response(
                 data={
                     "message": "Event with id: {} does not exist".format(kwargs["pk"])
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class EventListRetrieveViewGivenMonth(generics.ListCreateAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            events = self.queryset.filter(date__month=kwargs["pk"])
+            return Response(EventSerializer(events, many=True).data)
+        except Event.DoesNotExist:
+            return Response(
+                data={
+                    "message": "No events for month with id: {}".format(kwargs["pk"])
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
