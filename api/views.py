@@ -1,4 +1,5 @@
 import bcrypt
+from django.db.models import Q
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
@@ -100,6 +101,23 @@ class EventListRetrieveView(generics.ListCreateAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EventSearchView(APIView):
+    def get(self, request):
+        keyword = request.query_params.get('keyword', '')
+        if not keyword:
+            return Response({"error": "Please provide a search keyword"}, status=status.HTTP_400_BAD_REQUEST)
+
+        events = Event.objects.filter(
+            Q(name__icontains=keyword) |
+            Q(description__icontains=keyword) |
+            Q(location__icontains=keyword) |
+            Q(tags__icontains=keyword)
+        ).distinct()
+
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data)
 
 
 class EventListDeleteView(generics.ListCreateAPIView):

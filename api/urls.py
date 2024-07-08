@@ -11,7 +11,7 @@ urlpatterns = [
 
     path('events/month/<int:pk>/', views.EventListRetrieveViewGivenMonth.as_view(), name='events_month'),
     path('events/<int:pk>/reservations/', views.ReservationListRetrieveViewGivenEvent.as_view(),
-         name='event_reservationsnmt'),
+         name='event_reservation'),
     path('events/<int:pk>/reservations/<str:username>/', views.ReservationCreateDeleteViewGivenUser.as_view(),
          name='event_reservations'),
     path('events/<int:pk>/attendees/', views.EventRetrieveAttendeesGivenEvent.as_view(), name='event_reservations'),
