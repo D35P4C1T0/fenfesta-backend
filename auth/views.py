@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .serializers import UserRegisterSerializer, UserLoginSerializer
 from api.serializers import UserSerializer
 from rest_framework import permissions, status
-from .validations import custom_validation, validate_email, validate_password
+from .validations import registration_validation, validate_email, validate_password, validate_login
 
 from api.models import UserProfile as UserModel
 
@@ -14,7 +14,7 @@ class UserRegister(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-        clean_data = custom_validation(request.data)
+        clean_data = registration_validation(request.data)
         serializer = UserRegisterSerializer(data=clean_data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.create(clean_data)
@@ -28,7 +28,8 @@ class UserLogin(APIView):
     authentication_classes = (SessionAuthentication,)
 
     def post(self, request):
-        clean_data = custom_validation(request.data)
+        clean_data = validate_login(request.data)
+        print(clean_data)
         try:
             user = UserModel.objects.get(email=clean_data['email'])
             if user.check_password(clean_data['password']):
@@ -59,6 +60,3 @@ class UserView(APIView):
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
 
 
-from django.shortcuts import render
-
-# Create your views here.

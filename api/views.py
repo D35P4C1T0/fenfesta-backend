@@ -9,7 +9,7 @@ from rest_framework.authentication import SessionAuthentication
 from .models import Event, Reservation, UserProfile as User
 from .serializers import EventSerializer, UserSerializer, ReservationSerializer
 
-from auth.validations import custom_validation, validate_password, validate_email
+from auth.validations import registration_validation, validate_password, validate_email
 
 
 # Class to view all users
