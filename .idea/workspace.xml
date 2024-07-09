@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="29aa0600-7675-4262-bef6-0271561c83fc" name="Changes" comment="Fixed Login">
+    <list default="true" id="29aa0600-7675-4262-bef6-0271561c83fc" name="Changes" comment="JWT token">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/auth/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fenfesta_backend/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/fenfesta_backend/settings.py" afterDir="false" />
     </list>
@@ -135,7 +134,7 @@
       <workItem from="1717404202280" duration="310000" />
       <workItem from="1720010063747" duration="38000" />
       <workItem from="1720010118219" duration="628000" />
-      <workItem from="1720370480564" duration="14560000" />
+      <workItem from="1720370480564" duration="17663000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <option name="closed" value="true" />
@@ -233,7 +232,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720534274867</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="JWT token">
+      <option name="closed" value="true" />
+      <created>1720541461005</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1720541461005</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -264,6 +271,7 @@
     <MESSAGE value="Add events search by keyword" />
     <MESSAGE value="Oopsie - look at past commit" />
     <MESSAGE value="Fixed Login" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed Login" />
+    <MESSAGE value="JWT token" />
+    <option name="LAST_COMMIT_MESSAGE" value="JWT token" />
   </component>
 </project>
