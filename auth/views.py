@@ -1,13 +1,13 @@
-from django.contrib.auth import get_user_model, login, logout
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import UserRegisterSerializer, UserLoginSerializer
-from api.serializers import UserSerializer
-from rest_framework import permissions, status
-from .validations import registration_validation, validate_email, validate_password, validate_login
-
+from rest_framework import status, permissions
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.contrib.auth import authenticate
 from api.models import UserProfile as UserModel
+from api.serializers import UserSerializer
+from .serializers import UserRegisterSerializer
+from .validations import registration_validation, validate_login
 
 
 class UserRegister(APIView):
@@ -19,44 +19,50 @@ class UserRegister(APIView):
         if serializer.is_valid(raise_exception=True):
             user = serializer.create(clean_data)
             if user:
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'user': serializer.data,
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserLogin(APIView):
     permission_classes = (permissions.AllowAny,)
-    authentication_classes = (SessionAuthentication,)
 
     def post(self, request):
         clean_data = validate_login(request.data)
-        print(clean_data)
-        try:
-            user = UserModel.objects.get(email=clean_data['email'])
-            if user.check_password(clean_data['password']):
-                login(request, user)
-                serializer = UserSerializer(user)
-                return Response({'user': serializer.data}, status=status.HTTP_200_OK)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        except UserModel.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = authenticate(username=clean_data['username'], password=clean_data['password'])
+        if user:
+            refresh = RefreshToken.for_user(user)
+            serializer = UserSerializer(user)
+            return Response({
+                'user': serializer.data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserLogout(APIView):
-    permission_classes = (permissions.AllowAny,)
-    authentication_classes = ()
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        logout(request)
-        return Response(status=status.HTTP_200_OK)
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserView(APIView):
+    authentication_classes = (JWTAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = (SessionAuthentication,)
 
-    ##
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
-
-
