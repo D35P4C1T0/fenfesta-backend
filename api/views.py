@@ -1,6 +1,10 @@
+import os
+import requests
+
 import bcrypt
 from django.db.models import Q
 from rest_framework import generics, status, permissions
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.views import APIView
@@ -309,3 +313,48 @@ class ReservationCreateDeleteViewGivenUser(generics.CreateAPIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Geocoding
+class GeocodeView(APIView):
+    def get(self, request):
+        address = request.data.get('address')
+        if not address:
+            return Response({'error': 'Address parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get API key from environment variable
+        api_key = os.environ.get('GEOCODING_API_KEY')
+        if not api_key:
+            return Response({'error': 'API key not configured'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Example API endpoint (replace with your actual geocoding service URL)
+        geocoding_api_url = 'geocoding.openapi.it/geocode'
+
+        # Parameters for the GET request
+        params = {
+            'address': address,
+        }
+
+        # Headers including the API token
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+
+        try:
+            response = requests.get(geocoding_api_url, params=params, headers=headers)
+            response.raise_for_status()  # Raises an HTTPError for bad responses
+            data = response.json()
+
+            if 'results' in data and data['results']:
+                location = data['results'][0]
+                return Response({
+                    'address': address,
+                    'latitude': location['latitude'],
+                    'longitude': location['longitude']
+                })
+            else:
+                return Response({'error': 'No results found'}, status=status.HTTP_404_NOT_FOUND)
+
+        except requests.RequestException as e:
+            return Response({'error': f'API request failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

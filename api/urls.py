@@ -29,4 +29,6 @@ urlpatterns = [
     path('reservations/', views.ReservationListRetrieveView.as_view(), name='reservations'),
     path('reservations/<int:pk>/', views.ReservationListRetrieveViewGivenEvent.as_view(), name='reservation'),
 
+    # Geocode
+    path('geocode/', views.GeocodeView.as_view(), name='geocode'),
 ]
