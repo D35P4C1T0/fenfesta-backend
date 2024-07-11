@@ -333,7 +333,7 @@ class GeocodeView(APIView):
             return Response({'error': 'API key not configured'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Example API endpoint (replace with your actual geocoding service URL)
-        geocoding_api_url = 'https://test.geocoding.openapi.it/geocode'
+        geocoding_api_url = 'https://geocoding.openapi.it/geocode'
 
         # Body of the request
         data = {"address": address}
@@ -352,9 +352,11 @@ class GeocodeView(APIView):
             if data['success']:
                 element = data['element']
                 return Response({
-                    'address': address,
+                    'address': element['streetName'],
                     'latitude': element['latitude'],
                     'longitude': element['longitude'],
+                    'streetNumber': element['streetNumber'],
+                    'city': element['locality'],
                 })
             else:
                 return Response({'error': 'No results found'}, status=status.HTTP_404_NOT_FOUND)

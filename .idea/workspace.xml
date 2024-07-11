@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="29aa0600-7675-4262-bef6-0271561c83fc" name="Changes" comment="Geocode API added - 2">
+    <list default="true" id="29aa0600-7675-4262-bef6-0271561c83fc" name="Changes" comment="Changes to post so that retrofit2 doesn't complain">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -132,7 +133,7 @@
       <workItem from="1717404202280" duration="310000" />
       <workItem from="1720010063747" duration="38000" />
       <workItem from="1720010118219" duration="628000" />
-      <workItem from="1720370480564" duration="30171000" />
+      <workItem from="1720370480564" duration="31049000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <option name="closed" value="true" />
@@ -262,7 +263,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720693478011</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Changes to post so that retrofit2 doesn't complain">
+      <option name="closed" value="true" />
+      <created>1720706941398</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1720706941398</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -297,6 +306,7 @@
     <MESSAGE value="JWT token 2" />
     <MESSAGE value="Geocode API added" />
     <MESSAGE value="Geocode API added - 2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Geocode API added - 2" />
+    <MESSAGE value="Changes to post so that retrofit2 doesn't complain" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes to post so that retrofit2 doesn't complain" />
   </component>
 </project>
