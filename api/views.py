@@ -322,7 +322,7 @@ class ReservationCreateDeleteViewGivenUser(generics.CreateAPIView):
 
 # Geocoding
 class GeocodeView(APIView):
-    def get(self, request):
+    def post(self, request):
         address = request.data.get('address')
         if not address:
             return Response({'error': 'Address parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
