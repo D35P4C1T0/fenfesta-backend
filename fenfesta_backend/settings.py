@@ -9,9 +9,17 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Geocoding API key
+GEOCODING_API_KEY = os.getenv('GEOCODING_API_KEY')
+if not GEOCODING_API_KEY:
+    raise ValueError("GEOCODING_API_KEY is not set in the environment")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

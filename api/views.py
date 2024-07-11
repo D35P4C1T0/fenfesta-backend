@@ -3,6 +3,7 @@ import requests
 
 import bcrypt
 from django.db.models import Q
+from django.conf import settings
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -13,7 +14,11 @@ from rest_framework.authentication import SessionAuthentication
 from .models import Event, Reservation, UserProfile as User
 from .serializers import EventSerializer, UserSerializer, ReservationSerializer
 
+from dotenv import load_dotenv
+
 from auth.validations import registration_validation, validate_password, validate_email
+
+load_dotenv()
 
 
 # Class to view all users
@@ -323,17 +328,15 @@ class GeocodeView(APIView):
             return Response({'error': 'Address parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Get API key from environment variable
-        api_key = os.environ.get('GEOCODING_API_KEY')
+        api_key = settings.GEOCODING_API_KEY
         if not api_key:
             return Response({'error': 'API key not configured'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Example API endpoint (replace with your actual geocoding service URL)
-        geocoding_api_url = 'geocoding.openapi.it/geocode'
+        geocoding_api_url = 'https://test.geocoding.openapi.it/geocode'
 
-        # Parameters for the GET request
-        params = {
-            'address': address,
-        }
+        # Body of the request
+        data = {"address": address}
 
         # Headers including the API token
         headers = {
@@ -342,16 +345,16 @@ class GeocodeView(APIView):
         }
 
         try:
-            response = requests.get(geocoding_api_url, params=params, headers=headers)
+            response = requests.post(geocoding_api_url, headers=headers, json=data)
             response.raise_for_status()  # Raises an HTTPError for bad responses
             data = response.json()
 
-            if 'results' in data and data['results']:
-                location = data['results'][0]
+            if data['success']:
+                element = data['element']
                 return Response({
                     'address': address,
-                    'latitude': location['latitude'],
-                    'longitude': location['longitude']
+                    'latitude': element['latitude'],
+                    'longitude': element['longitude'],
                 })
             else:
                 return Response({'error': 'No results found'}, status=status.HTTP_404_NOT_FOUND)
