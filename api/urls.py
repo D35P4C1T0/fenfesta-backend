@@ -7,6 +7,7 @@ from . import views
 urlpatterns = [
     # Events
     path('events/', views.EventListRetrieveView.as_view(), name='events'),
+    # path('events/new', views.EventCreate.as_view(), name='events'), # TODO
     path('events/<int:pk>/', views.EventRetrieveViewDestroy.as_view(), name='event'),
     path('events/month/<int:pk>/', views.EventListRetrieveViewGivenMonth.as_view(), name='events_month'),
     path('events/search', views.EventSearchView.as_view(), name='event-search'),

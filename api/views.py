@@ -10,9 +10,11 @@ from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication
+from django.db import IntegrityError
 
 from .models import Event, Reservation, UserProfile as User
 from .serializers import EventSerializer, UserSerializer, ReservationSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from dotenv import load_dotenv
 
@@ -318,6 +320,8 @@ class ReservationCreateDeleteViewGivenUser(generics.CreateAPIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 # Geocoding
