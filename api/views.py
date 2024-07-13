@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.conf import settings
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.views import APIView
@@ -322,6 +323,19 @@ class ReservationCreateDeleteViewGivenUser(generics.CreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CreateEventView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        if not request.user.has_perm('your_app.add_event'):
+            raise PermissionDenied("You don't have permission to create events.")
+
+        serializer = EventSerializer(data=request.data)
+        if serializer.is_valid():
+            # Add the current user as the creator of the event
+            serializer.save(creator=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Geocoding
