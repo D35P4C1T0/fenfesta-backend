@@ -327,8 +327,10 @@ class CreateEventView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        if not request.user.has_perm('your_app.add_event'):
-            raise PermissionDenied("You don't have permission to create events.")
+        # if not request.user.has_perm('your_app.add_event'):
+        #     raise PermissionDenied("You don't have permission to create events.")
+
+        print(request.data)
 
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():

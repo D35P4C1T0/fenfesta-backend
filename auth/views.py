@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, update_session_auth_hash
 from api.models import UserProfile as UserModel
 from api.serializers import UserSerializer
 from .serializers import UserRegisterSerializer
@@ -104,3 +104,37 @@ class UserView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        if not old_password or not new_password or not confirm_password:
+            return Response({'error': 'All fields are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.check_password(old_password):
+            return Response({'error': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new_password != confirm_password:
+            return Response({'error': 'New passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if old_password == new_password:
+            return Response({'error': 'New password must be different from the current password'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Add any additional password validation here (e.g., minimum length, complexity)
+
+        user.set_password(new_password)
+        user.save()
+
+        # Update the session to prevent the user from being logged out
+        update_session_auth_hash(request, user)
+
+        return Response({'message': 'Password successfully changed'}, status=status.HTTP_200_OK)
