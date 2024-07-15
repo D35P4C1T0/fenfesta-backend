@@ -4,14 +4,17 @@ import requests
 import bcrypt
 from django.db.models import Q
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication
 from django.db import IntegrityError
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Event, Reservation, UserProfile as User
 from .serializers import EventSerializer, UserSerializer, ReservationSerializer
@@ -84,19 +87,26 @@ class UserReservationsListRetrieveView(generics.ListCreateAPIView):
             )
 
 
-class UserReservedEventsListView(generics.ListCreateAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
+class UserReservedEventsListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         try:
-            reservations = Reservation.objects.filter(user_id=kwargs["pk"])
-            events = Event.objects.filter(id__in=[reservation.event_id for reservation in reservations])
+            # Get reservations for the authenticated user
+            reservations = Reservation.objects.filter(user=request.user)
+
+            # Get events associated with these reservations, ordered by date
+            events = Event.objects.filter(
+                id__in=[reservation.event_id for reservation in reservations]
+            ).order_by('date')  # This line orders the events by date
+
+            # Serialize and return the events
             return Response(EventSerializer(events, many=True).data)
-        except Reservation.DoesNotExist:
+        except Exception as e:
             return Response(
                 data={
-                    "message": "No reservations for user with id: {}".format(kwargs["pk"])
+                    "message": f"Error retrieving reservations: {str(e)}"
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -338,6 +348,38 @@ class CreateEventView(APIView):
             serializer.save(creator=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+## View to make a new reservation
+class CreateReservationView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        event_id = request.data.get('event_id')
+        if not event_id:
+            return Response({'error': 'Event ID is required', 'code': 'MISSING_EVENT_ID'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        event = get_object_or_404(Event, id=event_id)
+
+        if event.capacity_left <= 0:
+            return Response({'error': 'This event is fully booked', 'code': 'EVENT_FULL'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        existing_reservation = Reservation.objects.filter(user=request.user, event=event).first()
+        if existing_reservation:
+            return Response({'error': 'You already have a reservation for this event', 'code': 'RESERVATION_EXISTS'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        reservation = Reservation(user=request.user, event=event)
+        reservation.save()
+
+        event.capacity_left -= 1
+        event.save()
+
+        serializer = ReservationSerializer(reservation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # Geocoding
