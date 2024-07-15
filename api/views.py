@@ -5,6 +5,7 @@ import bcrypt
 from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
@@ -13,7 +14,7 @@ from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Event, Reservation, UserProfile as User
@@ -70,6 +71,106 @@ class UserRetrieveDestroyView(generics.ListCreateAPIView):
             )
 
 
+class DeleteUserAccountView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def delete(self, request):
+        user = request.user
+        try:
+            # Delete all reservations made by the user
+            Reservation.objects.filter(user=user).delete()
+
+            # Delete all events created by the user
+            Event.objects.filter(creator=user).delete()
+
+            # Finally, delete the user account
+            user.delete()
+
+            return Response({
+                "message": "User account and all associated data have been successfully deleted."
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # If any error occurs, rollback the transaction
+            transaction.set_rollback(True)
+            return Response({
+                "error": f"An error occurred while deleting the account: {str(e)}",
+                "code": "DELETE_ACCOUNT_ERROR"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class IsEventReservedView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        # Get the event or return 404 if not found
+        event = get_object_or_404(Event, pk=pk)
+
+        # Check if the user has a reservation for this event
+        is_reserved = Reservation.objects.filter(user=request.user, event=event).exists()
+
+        return Response({
+            'event_id': pk,
+            'is_reserved': is_reserved
+        }, status=status.HTTP_200_OK)
+
+
+class RemoveReservationView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            with transaction.atomic():
+                # Get the event or raise ObjectDoesNotExist
+                try:
+                    event = Event.objects.get(pk=pk)
+                except Event.DoesNotExist:
+                    return Response({
+                        'error': 'Event not found',
+                        'code': 'EVENT_NOT_FOUND'
+                    }, status=status.HTTP_404_NOT_FOUND)
+
+                # Try to get the reservation
+                try:
+                    reservation = Reservation.objects.get(user=request.user, event=event)
+                except Reservation.DoesNotExist:
+                    return Response({
+                        'error': 'No reservation found for this event',
+                        'code': 'RESERVATION_NOT_FOUND'
+                    }, status=status.HTTP_404_NOT_FOUND)
+
+                # Check if the event has already occurred
+                from django.utils import timezone
+                if event.date < timezone.now():
+                    return Response({
+                        'error': 'Cannot remove reservation for past events',
+                        'code': 'PAST_EVENT'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                # Reservation exists and event is in the future, delete it
+                reservation.delete()
+
+                # Increase the event's capacity_left
+                event.capacity_left += 1
+                event.save()
+
+                return Response({
+                    'message': 'Reservation successfully removed',
+                    'event_id': pk
+                }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the exception here
+            return Response({
+                'error': 'An unexpected error occurred',
+                'code': 'UNEXPECTED_ERROR'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class UserReservationsListRetrieveView(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
@@ -116,6 +217,29 @@ class UserReservedEventsListView(APIView):
 class EventListRetrieveView(generics.ListCreateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = EventSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpcomingEventsView(generics.ListAPIView):
+    serializer_class = EventSerializer
+
+    def get_queryset(self):
+        # Get current date and time
+        now = timezone.now()
+
+        # Filter events that are happening now or in the future
+        return Event.objects.filter(date__gte=now).order_by('date')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = EventSerializer(data=request.data)
@@ -276,6 +400,26 @@ class EventRetrieveReservationsGivenEvent(generics.ListCreateAPIView):
 class ReservationListRetrieveView(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+
+
+class UserReservationCountView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Count reservations for the authenticated user
+            reservation_count = Reservation.objects.filter(user=request.user).count()
+
+            return Response({
+                'reservation_count': reservation_count
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'error': f'An error occurred: {str(e)}',
+                'code': 'UNEXPECTED_ERROR'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # get all reservation for a given event ID
