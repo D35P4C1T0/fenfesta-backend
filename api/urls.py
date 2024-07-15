@@ -17,6 +17,7 @@ urlpatterns = [
     path('events/<int:pk>/reservations/<str:username>/', views.ReservationCreateDeleteViewGivenUser.as_view(),
          name='event_reservations'),
     path('events/<int:pk>/attendees/', views.EventRetrieveAttendeesGivenEvent.as_view(), name='event_reservations'),
+    path('events/<int:event_id>/creator-info/', views.EventCreatorInfoView.as_view(), name='event-creator-info'),
     # Users
     path('users/profile/', auth.views.UserView.as_view(), name='user'),  # protected route
     path('users/number-of-reservations/', views.UserReservationCountView.as_view(), name='user_reservations_count'),

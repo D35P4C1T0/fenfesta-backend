@@ -101,6 +101,37 @@ class DeleteUserAccountView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class EventCreatorInfoView(APIView):
+    def get(self, request, event_id):
+        try:
+            # Get the event by ID
+            event = get_object_or_404(Event, id=event_id)
+
+            # Get the creator of the event
+            creator = event.creator
+
+            # Prepare the response data
+            creator_info = {
+                'username': creator.username,
+                'first_name': creator.first_name,
+                'last_name': creator.last_name
+            }
+
+            return Response(creator_info, status=status.HTTP_200_OK)
+
+        except Event.DoesNotExist:
+            return Response({
+                'error': 'Event not found',
+                'code': 'EVENT_NOT_FOUND'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                'error': f'An unexpected error occurred: {str(e)}',
+                'code': 'UNEXPECTED_ERROR'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class IsEventReservedView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
