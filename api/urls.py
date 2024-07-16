@@ -37,7 +37,7 @@ urlpatterns = [
 
     path('reservations/<int:pk>/remove', views.RemoveReservationView.as_view(), name='delete_reservation'),
 
-    path('reservation/new', views.CreateReservationView.as_view(), name='create_reservation'),
+    path('reservations/new', views.CreateReservationView.as_view(), name='create_reservation'),
 
     # Geocode
     path('geocode/', views.GeocodeView.as_view(), name='geocode'),

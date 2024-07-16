@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="29aa0600-7675-4262-bef6-0271561c83fc" name="Changes" comment="&quot;Delete account&quot; view">
+    <list default="true" id="29aa0600-7675-4262-bef6-0271561c83fc" name="Changes" comment="Event creator name view">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,7 +134,8 @@
       <workItem from="1720010063747" duration="38000" />
       <workItem from="1720010118219" duration="628000" />
       <workItem from="1720370480564" duration="43969000" />
-      <workItem from="1721031957126" duration="19108000" />
+      <workItem from="1721031957126" duration="23375000" />
+      <workItem from="1721119877783" duration="3282000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <option name="closed" value="true" />
@@ -313,7 +313,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721065676552</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Event creator name view">
+      <option name="closed" value="true" />
+      <created>1721070566938</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1721070566938</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -354,6 +362,7 @@
     <MESSAGE value="Change password view" />
     <MESSAGE value="Retrieve reservations list" />
     <MESSAGE value="&quot;Delete account&quot; view" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;Delete account&quot; view" />
+    <MESSAGE value="Event creator name view" />
+    <option name="LAST_COMMIT_MESSAGE" value="Event creator name view" />
   </component>
 </project>
