@@ -24,12 +24,9 @@ RUN mkdir -p /app/staticfiles
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Create the entrypoint script
-RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-    echo 'python manage.py migrate' >> /app/entrypoint.sh && \
-    echo 'python manage.py create_admin' >> /app/entrypoint.sh && \
-    echo 'exec "$@"' >> /app/entrypoint.sh && \
-    chmod +x /app/entrypoint.sh
+# Copy the entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
