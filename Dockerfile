@@ -18,6 +18,9 @@ COPY . .
 # Create a directory for the database
 RUN mkdir -p /app/data
 
+# Create a directory for static files
+RUN mkdir -p /app/staticfiles
+
 # Collect static files
 RUN python manage.py collectstatic --noinput
 

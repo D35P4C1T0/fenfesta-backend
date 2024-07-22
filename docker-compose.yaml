@@ -8,7 +8,7 @@ services:
       - .:/app
       - db_data:/app/data
       - ./media:/app/media
-      - ./static:/app/static
+      - static_volume:/app/staticfiles
     ports:
       - "8000:8000"
     env_file:
@@ -21,3 +21,4 @@ services:
 
 volumes:
   db_data:
+  static_volume:  
