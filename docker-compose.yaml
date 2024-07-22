@@ -12,7 +12,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - stack.env
+      - .env
     # environment:
     #   - GEOCODING_API_KEY=
     #   - DATABASE_PATH=/app/data/db.sqlite3
